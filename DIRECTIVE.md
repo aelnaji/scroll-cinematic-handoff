@@ -109,15 +109,24 @@ If any of these reappear the job has failed, however good it looks:
 
 ## 6. ASSETS
 
-Frame strips and source footage are already in the repository. **Locate them yourself and report
-the real numbers.** Do not trust any figure written here, including these — they were measured on
-a copy of the project and may have moved:
+**Target repository:** https://github.com/aelnaji/al-ryum-clone — the working scroll-3D branch
+is `scroll-3d-cinematic` (the live-site baseline is `main`). Clone the branch, do not start from
+`main`, or you will be rebuilding work that already exists.
+
+Frame strips are already in the repository. **Locate them yourself and report the real numbers.**
+Do not trust any figure written here, including these — measured on a copy of the project:
 
 | Strip | Frames | Measured size | Verdict |
 |---|---|---|---|
 | `assets/projects/louvre/frames/` | 80 | ~8.7 MB | within budget |
-| `assets/projects/warner-bros/frames/` | 80 | ~49 MB | **over budget — compress first** |
-| `assets/projects/emirates/frames/` | 80 | ~55 MB | **over budget — compress first** |
+| `assets/projects/warner-bros/frames/` | 80 | ~49 MB | over budget |
+| `assets/projects/emirates/frames/` | 80 | ~55 MB | over budget |
+| `assets/projects/warner-bros/frames-720p-backup/` | 80 | ~11 MB | **already within budget — use this** |
+| `assets/projects/emirates/frames-720p-backup/` | 80 | ~10 MB | **already within budget — use this** |
+
+The two 720p strips are the compressed versions and already satisfy C8. **Check for them before
+compressing anything** — the budget problem may already be solved in the repo. Only re-encode if
+they are missing or the visual quality is not good enough.
 
 Source clips: `assets/cinematic-source/` (louvre-abu-dhabi, warner-bros, zayed-national-museum,
 emirates-palace) plus `hero-garden.mp4`, `hero-mist.mp4`, `seamless-mist-loop.mp4`.
@@ -128,9 +137,6 @@ Verified on this machine: **ffmpeg 8.1.2** and **ffprobe** at `/usr/local/bin`.
   (an 8s clip → 80 frames).
 - Compress: `scripts/compress-frames.sh <frames-dir> 1600 88` from the scroll-cinematic skill
   (§7) after you install it.
-
-**Bring warner-bros and emirates under ~15 MB each before building anything.** 49 MB and 55 MB
-of JPEGs will visibly stall first paint. Compress into a new folder; keep the originals.
 
 80 frames is acceptable if the stride is even. If scrubbing visibly steps, re-slice at a higher
 fps up to 180 frames — no further. More frames only buys load time.

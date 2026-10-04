@@ -20,6 +20,11 @@ sends one complete report at the end.
 | `skills/` | `scroll-world` vendored (MIT) — `skills/scroll-world/references/scrub-engine.js` is the engine to start from. See `skills/NOTICE.md` |
 | `install-skills.sh` | Installs the skills into `~/.claude/skills/`. Additive; skips what is present; fast-forwards an existing checkout |
 
+## Target repository
+
+The site this brief applies to: **https://github.com/aelnaji/al-ryum-clone** —
+branch `scroll-3d-cinematic` (live-site baseline is `main`). Clone the branch, not `main`.
+
 ## The one line to start it
 
 ```
