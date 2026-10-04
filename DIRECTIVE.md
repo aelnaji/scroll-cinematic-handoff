@@ -95,18 +95,30 @@ fix. Any regression to page-level progress is a failed delivery.
 - Existing subagents: `web-designer`, `ui-designer`, `design-reviewer`, `code-reviewer`,
   `nextjs-lead`, `a11y-auditor` (in `~/.claude/agents/`)
 
-### Install now
-```bash
-git clone https://github.com/zubair-trabzada/scroll-cinematic-claude.git ~/.claude/skills/scroll-cinematic
-```
-Reusable from it (all runnable here — ffmpeg 8.1.2 is installed):
-- `scripts/extract-frames.sh <clip.mp4> frames/<name> 180`
-- `scripts/compress-frames.sh frames/<name> 1600 88`
-- `templates/scroll-cinematic.js` — the multi-section scrub engine + `SCRUB_SECTIONS` config
-- `templates/index.html`, `templates/styles.css`, `templates/CinematicReveal.tsx`
+### Install first — see `SKILLS.md`
 
-**Do not run** steps 2, 3, 4 of that skill (hero keyframe + clip generation) — those are the
-Higgsfield parts that are out of scope. Steps 0, 5, 6, 7 apply.
+`SKILLS.md` ranks the current scroll / 3D-scroll skill landscape with verified star counts and
+tells you which to install. **Install Tier A only** — `scroll-craft`, `scroll-video-website`
+and (optional) `motion-dev-animations` — verify each install with its real output, and report
+which one you are actually using for the engine. Tier B is read-only reference. **Tier C must
+not be installed**: those depend on paid asset generation, which §2 excludes.
+
+### Also vendored in this repo — no install needed
+
+- `skills/scroll-cinematic/` — the Komputer Mechanic pipeline. Reusable parts:
+  - `scripts/extract-frames.sh <clip.mp4> frames/<name> 180`
+  - `scripts/compress-frames.sh frames/<name> 1600 88`
+  - `templates/scroll-cinematic.js` — the multi-section scrub engine + `SCRUB_SECTIONS` config
+  - `templates/index.html`, `templates/styles.css`, `templates/CinematicReveal.tsx`
+- `skills/scroll-world/` — `references/scrub-engine.js` (the engine), `index-template.html`,
+  `pipeline.md`, `prompts.md`, `knockout.py`.
+
+**Do not run** steps 2, 3, 4 of the scroll-cinematic `SKILL.md` (hero keyframe + clip
+generation) — those are the Higgsfield parts, out of scope. Steps 0, 5, 6, 7 apply. All of the
+scripts above run as-is: ffmpeg 8.1.2 is installed.
+
+If you would rather have either skill in `~/.claude/skills/` than read it from here, run
+`install-skills.sh` — it clones both from upstream and skips anything already present.
 
 ### Existing repo assets to drive the scrub (no generation)
 ```

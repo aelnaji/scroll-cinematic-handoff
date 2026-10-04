@@ -13,7 +13,8 @@ image-sequence scrub driving frame strips that already exist in the target repo.
 | `DIRECTIVE.md` | The mission, hard exclusions, the engine contract, the known failure to fix, installed skills, the sub-agents to create, the completion gate |
 | `PROMPTS.md` | The numbered prompt pack — paste one at a time, in order, and wait for the report after each |
 | `skills/` | Both supporting skills vendored, so nothing needs installing to read them. `skills/scroll-world/references/scrub-engine.js` is the engine to start from. See `skills/NOTICE.md` for origin and license. |
-| `install-skills.sh` | Optional: installs the two skills into `~/.claude/skills/`. Additive only, skips what is already present. |
+| `SKILLS.md` | The ranked scroll / 3D-scroll skill landscape with verified star counts, install commands, and the tiering: **install Tier A, read Tier B, never install Tier C.** |
+| `install-skills.sh` | Optional: installs the two vendored skills into `~/.claude/skills/`. Additive only, skips what is already present. |
 
 ## Start
 
