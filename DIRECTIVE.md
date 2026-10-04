@@ -1,184 +1,262 @@
-# DIRECTIVE — scroll-driven cinematic hero pass
+# DIRECTIVE — scroll-driven cinematic hero: requirements
 
-Hand this file to Claude Code as the first message: `Read DIRECTIVE.md and PROMPTS.md in this repo, then wait for prompt 0.`
+**You own this end to end.** This document is the complete brief. Everything you need to decide,
+build and prove is here or reachable from here. Nothing in it requires the owner to answer
+questions, approve steps, or relay instructions.
 
-Source: Komputer Mechanic — "How to Build $10,000 3D Animated Websites With Claude Code"
-(https://www.youtube.com/watch?v=mFgRGSOGNPM · tutorial: https://komputermechanic.com/tutorials/scroll-animation-website)
+Source of the technique: Komputer Mechanic — "How to Build $10,000 3D Animated Websites With
+Claude Code" (https://www.youtube.com/watch?v=mFgRGSOGNPM). The generation steps of that
+tutorial are removed here; see §2.
 
 ---
 
-## 1. MISSION
+## 0. HOW YOU OPERATE
 
-The site is already built and approved. The only job is the **scroll-driven hero animation
-("final touch")**, wired into the existing page.
+### Autonomy
+Work straight through, phase by phase, without stopping for approval. Do not ask the owner to
+paste, confirm or choose anything this document already decides.
 
-Not in scope: redesign, rebuild, new sections, new pages, new branding, new visual assets.
+### The only three reasons to contact the owner
+1. An action would cost money.
+2. A change would land outside the working repository and `~/.claude/skills/`.
+3. You are genuinely blocked — after **three distinct attempts**, each with real output.
 
-| Item | Decision |
+Everything else: decide, do it, document it in the final report. "Waiting for confirmation" is
+not a reason for an unfinished job — the confirmation is this document.
+
+### Escalation format
+One message, no preamble:
+```
+BLOCKED: <the single thing that cannot proceed>
+Tried: <attempt 1 + real output> / <attempt 2 + real output> / <attempt 3 + real output>
+Decision needed: <one question, with the options you see>
+Continuing meanwhile with: <what you are doing that is not blocked>
+```
+Never send two of these without doing the unblocked work first.
+
+### Honesty rules
+- Real command output only. Never summarise output you did not run.
+- Never mark a criterion PASS that you did not measure. Attach the measurement.
+- Never narrate intention ("I will now…"). Do the thing, then report the result.
+- If something is broken at the end, say so in one line with the next step. An honest blocker is
+  a finished job; a false "done" is not.
+
+## 1. SCOPE
+
+Make the existing hero **scroll-scrubbed and cinematic** using the assets already in this
+repository. Then carry the same treatment to the other cinematic sections, and finish the
+loading, mobile and reduced-motion behaviour.
+
+Out of scope: redesign, rebuild, new sections, new pages, new branding, new visual assets,
+touching approved copy or imagery.
+
+## 2. EXCLUSIONS — hard
+
+- **No image or video generation. No Higgsfield. No generation MCP. No paid API calls.** Every
+  visual already exists in the repo. Where third-party material names a generation model, read it
+  as *"use the existing asset at this path"*.
+- **No build step for the site.** No npm, no Node, no bundler, no Python process in the page
+  pipeline. Plain HTML + CSS + JS served as static files. Installing a *skill* into
+  `~/.claude/skills/` is fine — that is tooling, not the site.
+- No frameworks, no CDN added for this work.
+- No writes outside the working repository and `~/.claude/skills/`.
+- Backup before every change: copy the files you are about to modify into
+  `backups/<timestamp>/` inside the project, then edit.
+
+## 3. THE EFFECT — what you are actually building
+
+Not Three.js. Not a live 3D scene. It is a **canvas image-sequence scrub**:
+
+> a short cinematic clip is pre-exported to a numbered strip of JPEGs; all frames are preloaded;
+> the frame drawn to a `<canvas>` is chosen from scroll progress. Scrolling forward plays the
+> strip forward, scrolling back plays it backward. Floating overlay copy completes the illusion.
+
+The "3D" lives entirely in the source footage. Nothing is rendered at runtime.
+
+## 4. ENGINE CONTRACT — implement exactly this
+
+Deviate only if you record the deviation and its justification in the final report.
+
+| # | Rule |
 |---|---|
-| Goal | Existing hero + project frame strips become a scroll-scrubbed cinematic that plays forward on scroll-down and reverses on scroll-up |
-| Success criterion | At 3 different scroll positions the painted canvas frame index differs and progresses monotonically; scrolling back restores frame 0; the page parks and never runs away; verified side-by-side against the approved reference screenshot |
-| Failure signals | Whole-page scroll coupling; animation continues past the hero; background layer keeps moving after the section; canvas blank on scroll; "it compiles / returns 200" presented as done |
-| Starting point | **Reuse.** The frame strips, videos and existing approved CSS/JS stay. No regeneration of any asset. |
-| Execution mode | Patch the existing engine in place, smallest correct fix, one section at a time |
+| C1 | Progress comes from the hero scene's own rect, never the document: `progress = clamp((-rect.top) / (rect.height - innerHeight), 0, 1)` |
+| C2 | Scene height = scrub distance + 100vh. The pinned stage eats one viewport, so real scrub length is `sceneHeight − 100vh`. Apply any speed multiplier to the **scrub distance**, then add 100vh back. Never multiply the scene height. Best-practice band: 200–500vh of scroll per scene |
+| C3 | `position: sticky; top: 0; height: 100vh` inner stage inside a tall outer scene |
+| C4 | Cover-fit canvas draw; `devicePixelRatio` capped at 2 |
+| C5 | Damped follow: `smooth += (target - smooth) * 0.14` each frame. Settles in ~1s, steps 1–2 frame indices per frame |
+| C6 | If the rAF loop stops when settled it **must be re-kicked from the scroll handler**, or the film freezes after its first settle. Symptom: target updates, smooth stays pinned |
+| C7 | Preload every frame, paint frame 0 immediately, redraw only when the frame index changes |
+| C8 | Frame budget: ≤1600px wide, JPEG q88, 80–180 frames, **≤15 MB per section** |
+| C9 | Parks at progress 1 and stops consuming scroll. Scrolling back reverses exactly to frame 0 |
+| C10 | `IntersectionObserver` gating: no rAF work while the section is off-screen |
+| C11 | Loading curtain ~2–3s with visible progress, so frame 0 never pops in mid-page |
+| C12 | `prefers-reduced-motion: reduce` → a single static hero frame, no scrub |
+| C13 | Narrow viewports shrink the stage rather than re-cropping the footage |
+| C14 | Continuous source motion only. No hard cuts anywhere in the strip — a cut looks broken when scrubbed backwards |
 
-## 2. HARD EXCLUSIONS
+Page sizing rule: 1920x1080 is the **comparison screenshot** size only, never the page's size.
+Build with relative units so the page fills any window — no fixed pixel page width or height, no
+horizontal scroll.
 
-- **No Higgsfield. No MCP connector. No image or video generation of any kind.** Every visual already exists in the repo. If a prompt in `PROMPTS.md` names a generation model, treat it as *"use the existing asset at the given path"* instead.
-- **No new runtime dependency in the site**: no npm install, no Node, no Python, no bundler. Plain HTML + CSS + JS, served as static files.
-- No paid API calls, no credits spent.
-- No touch to existing approved imagery or copy.
-- Every change is backup-first (see §7).
+## 5. THE FAILURE THIS JOB EXISTS TO FIX
 
-## 3. GROUND TRUTH — WHAT THE EFFECT IS
+If any of these reappear the job has failed, however good it looks:
 
-The viral "3D scroll" effect is **not** Three.js and not a live 3D scene. It is a
-**canvas image-sequence scrub**:
+1. Progress derived from the whole page (`scrollY / documentHeight`) instead of the hero rect.
+2. A fixed `z-index: 0` full-page background layer that keeps travelling after the section has
+   scrolled past — the "extra layer, not a wire" symptom.
+3. A render loop that never stops once the section is out of view.
 
-> a short cinematic clip is exported to ~180 numbered JPGs, all preloaded, and the frame
-> drawn to a `<canvas>` is chosen by scroll progress. Scrolling forward/backward plays the
-> clip. Add smooth (damped) scroll-linked overlay copy and it reads as premium 3D.
+## 6. ASSETS
 
-The "3D" comes entirely from the source footage. Nothing is rendered at runtime.
+Frame strips and source footage are already in the repository. **Locate them yourself and report
+the real numbers.** Do not trust any figure written here, including these — they were measured on
+a copy of the project and may have moved:
 
-## 4. ENGINE CONTRACT — non-negotiable
+| Strip | Frames | Measured size | Verdict |
+|---|---|---|---|
+| `assets/projects/louvre/frames/` | 80 | ~8.7 MB | within budget |
+| `assets/projects/warner-bros/frames/` | 80 | ~49 MB | **over budget — compress first** |
+| `assets/projects/emirates/frames/` | 80 | ~55 MB | **over budget — compress first** |
 
-Implement exactly this. Deviations must be called out and justified before coding.
+Source clips: `assets/cinematic-source/` (louvre-abu-dhabi, warner-bros, zayed-national-museum,
+emirates-palace) plus `hero-garden.mp4`, `hero-mist.mp4`, `seamless-mist-loop.mp4`.
 
-1. **Hero-bound finite scrub.** Progress is computed from the hero scene's own rect, never
-   from the document:
-   `progress = clamp((-rect.top) / (rect.height - innerHeight), 0, 1)`
-2. **Scene height = scrub distance + 100vh.** The pinned stage consumes one viewport, so the
-   real scrub length is `sceneHeight − 100vh`. Best-practice band: 200–500vh of scroll per
-   scene. Apply a speed multiplier to the *scrub distance*, then add 100vh back — never
-   multiply the scene height itself.
-3. **Sticky stage.** Outer scene tall; inner `position: sticky; top: 0; height: 100vh`.
-4. **Cover-fit draw + HiDPI.** `devicePixelRatio` capped at 2.
-5. **Damped follow.** Ease an intermediate value toward the raw target each frame:
-   `smooth += (target - smooth) * 0.14`. Settles in ~1s; steps 1–2 frame indices per frame.
-6. **rAF re-kick.** If the rAF loop stops when settled it must be restarted from the scroll
-   handler, or the film freezes after its first settle. Symptom: target updates, smooth
-   stays pinned, frame never advances.
-7. **Redraw only on frame-index change.** Preload every frame; paint frame 0 immediately.
-8. **Frame budget:** ≤ 1600px wide, q88 JPEG, ~180 frames, < ~15 MB per section.
-9. **Parks at 1, restores at 0.** At `progress >= 1` the film holds its last frame and stops
-   consuming scroll; scrolling back reverses it to frame 0 exactly.
-10. **Visibility-gated render.** `IntersectionObserver` on the sticky stage — no rAF work
-    while the section is off-screen.
-11. **Loading curtain.** ~2–3s preload gate so frame 0 never pops in mid-page.
-12. **Reduced-motion + mobile:** honour `prefers-reduced-motion` (render a still hero frame);
-    on narrow viewports shrink the stage rather than re-cropping the footage.
-13. **Continuous motion only.** No hard cuts in the source clip — cuts look broken when
-    scrubbed backwards.
+Verified on this machine: **ffmpeg 8.1.2** and **ffprobe** at `/usr/local/bin`.
 
-## 5. KNOWN FAILURE — DO NOT REINTRODUCE
+- Re-slice: `ffmpeg -i <clip>.mp4 -vf "fps=10" -vsync 0 -q:v 3 frames/frame_%04d.jpg`
+  (an 8s clip → 80 frames).
+- Compress: `scripts/compress-frames.sh <frames-dir> 1600 88` from the scroll-cinematic skill
+  (§7) after you install it.
 
-The bug this pass exists to kill:
+**Bring warner-bros and emirates under ~15 MB each before building anything.** 49 MB and 55 MB
+of JPEGs will visibly stall first paint. Compress into a new folder; keep the originals.
 
-- progress derived from the **whole page** (`scrollY / documentHeight`) so the animation
-  advances across the entire site instead of inside the hero;
-- a **fixed `z-index: 0` background layer** that keeps travelling once the section has
-  scrolled past, producing "an extra layer, not a wire";
-- a render loop that never stops after the section is out of view.
+80 frames is acceptable if the stride is even. If scrubbing visibly steps, re-slice at a higher
+fps up to 180 frames — no further. More frames only buys load time.
 
-The contract in §4 (hero-bound `rect`-based progress, parking at 1, visibility gating) is the
-fix. Any regression to page-level progress is a failed delivery.
+## 7. SKILLS — what to install, what not to
 
-## 6. SKILLS
+Full landscape, tiers, star counts and install commands: **`SKILLS.md`**.
 
-### Already installed on this machine — verified
-- `~/.claude/skills/scroll-world/` — fly-through scrub skill. Reuse its
-  `references/scrub-engine.js` (portable vanilla-JS scrub engine, framework-agnostic),
-  `references/index-template.html`, `references/pipeline.md`, `references/prompts.md`,
-  `references/knockout.py`. Best starting point for the engine.
-- `~/.claude/skills/animation/`, `taste-skill/`, `design/`, `design-system/`
-- Existing subagents: `web-designer`, `ui-designer`, `design-reviewer`, `code-reviewer`,
-  `nextjs-lead`, `a11y-auditor` (in `~/.claude/agents/`)
+- **Install Tier A:** `scroll-craft` (plugin), `scroll-video-website-skill`, and optionally
+  `motion-dev-animations-skill`. Verify each install with its real output.
+- **Tier B is read-only.** Clone to a temp folder, read, cite, delete.
+- **Never install Tier C** — they need paid generation (§2).
+- `scroll-world` is vendored here at `skills/scroll-world/` (MIT, licence included). Its
+  `references/scrub-engine.js` is the engine to start from. Read it before writing an engine.
+- `scroll-cinematic` is **not** vendored. Install it from upstream: `bash install-skills.sh`
+  (or the clone command in `SKILLS.md`). Use **only steps 0, 5, 6, 7** of its `SKILL.md` —
+  steps 2–4 are generation and are excluded.
+- After installing, state which skill you are actually using for the engine and why. Installing a
+  skill and then ignoring it is not a plan.
 
-### Install first — see `SKILLS.md`
+## 8. WHERE TO GET HELP
 
-`SKILLS.md` ranks the current scroll / 3D-scroll skill landscape with verified star counts and
-tells you which to install. **Install Tier A only** — `scroll-craft`, `scroll-video-website`
-and (optional) `motion-dev-animations` — verify each install with its real output, and report
-which one you are actually using for the engine. Tier B is read-only reference. **Tier C must
-not be installed**: those depend on paid asset generation, which §2 excludes.
+Read these before escalating. Reading beats guessing.
 
-### Also vendored in this repo — no install needed
+| Need | Source |
+|---|---|
+| The scrub engine, working reference | `skills/scroll-world/references/scrub-engine.js` (448 lines) |
+| Fly-through pipeline, mobile canvases, knockout | `skills/scroll-world/references/pipeline.md`, `prompts.md`, `knockout.py` |
+| Frame slicing + compression recipes | `~/.claude/skills/scroll-cinematic/SKILL.md` steps 5–7, `scripts/extract-frames.sh`, `scripts/compress-frames.sh` |
+| A multi-section scrub config example | `~/.claude/skills/scroll-cinematic/templates/scroll-cinematic.js` and `index.html` |
+| ffmpeg filters | `ffmpeg -h filter=<name>`, `ffmpeg -filters`, the ffmpeg docs |
+| `IntersectionObserver`, canvas, sticky, `clamp()` | MDN |
+| Claude Code plugins, skills, subagents, hooks | `/help` in-session, plus the Claude Code docs |
+| A skill's install failure | that skill's README and issues page |
+| Motion and design judgement | `~/.claude/skills/taste-skill/`, `design/`, `design-system/`, and the subagents in §9 |
 
-- `skills/scroll-cinematic/` — the Komputer Mechanic pipeline. Reusable parts:
-  - `scripts/extract-frames.sh <clip.mp4> frames/<name> 180`
-  - `scripts/compress-frames.sh frames/<name> 1600 88`
-  - `templates/scroll-cinematic.js` — the multi-section scrub engine + `SCRUB_SECTIONS` config
-  - `templates/index.html`, `templates/styles.css`, `templates/CinematicReveal.tsx`
-- `skills/scroll-world/` — `references/scrub-engine.js` (the engine), `index-template.html`,
-  `pipeline.md`, `prompts.md`, `knockout.py`.
+Browser tooling for verification: whatever headless Chrome/Chromium is already available
+(Puppeteer, Playwright, or raw CDP). Run it outside the site — do not add a project dependency
+to get it.
 
-**Do not run** steps 2, 3, 4 of the scroll-cinematic `SKILL.md` (hero keyframe + clip
-generation) — those are the Higgsfield parts, out of scope. Steps 0, 5, 6, 7 apply. All of the
-scripts above run as-is: ffmpeg 8.1.2 is installed.
+## 9. SUB-AGENTS
 
-If you would rather have either skill in `~/.claude/skills/` than read it from here, run
-`install-skills.sh` — it clones both from upstream and skips anything already present.
+Reuse what exists in `~/.claude/agents/`: `web-designer`, `ui-designer`, `design-reviewer`,
+`code-reviewer`, `nextjs-lead`, `a11y-auditor`.
 
-### Existing repo assets to drive the scrub (no generation)
-```
-assets/projects/louvre/frames/          # 80 frames, 8.7 MB   -> within budget, use as-is
-assets/projects/warner-bros/frames/     # 80 frames, 49 MB    -> OVER BUDGET, compress first
-assets/projects/emirates/frames/        # 80 frames, 55 MB    -> OVER BUDGET, compress first
-assets/cinematic-source/*.mp4           # louvre-abu-dhabi, warner-bros, zayed-national-museum, emirates-palace
-assets/hero-garden.mp4, hero-mist.mp4, seamless-mist-loop.mp4
-```
-Re-slice with the installed ffmpeg:
-`ffmpeg -i <clip>.mp4 -vf "fps=10" -vsync 0 -q:v 3 frames/frame_%04d.jpg` (8s clip → 80 frames).
-Then compress to the budget: `bash ~/.claude/skills/scroll-cinematic/scripts/compress-frames.sh frames/<name> 1600 88`.
+Create what is missing:
 
-**First task in the build: bring warner-bros and emirates under ~15 MB each.** 49 MB and 55 MB
-of JPEGs will visibly stall the first paint. Compress into a new folder and keep the originals.
-
-## 7. STANDING RULES
-
-- Work one numbered prompt at a time. Never run ahead; stop and wait after each.
-- **Backup before every change**: `backups/<timestamp>/` inside the project, copy the files
-  you are about to modify, then edit.
-- No generation, no spend, no external call without stating it first.
-- **Verify by looking**: headless screenshot at 1920x1080, placed side by side with the
-  approved reference, compared by you, differences fixed, *before* you report back. Never
-  claim a match you have not compared.
-- 1920x1080 is the screenshot size only — never the page's size. Relative units only, no
-  fixed pixel page width/height, no horizontal scroll.
-- After each step: what you did, what the evidence is, what you are waiting for.
-
-## 8. SUB-AGENTS TO CREATE
-
-Create these four in `~/.claude/agents/` before starting the build:
-
-| Agent | Role | Must not |
+| Agent | Owns | Does not |
 |---|---|---|
-| `scrub-engineer` | Owns `scroll-cinematic.js` / the scrub engine, height math, damping, preload | Touch content, copy, or other sections |
-| `frame-pipeline` | ffmpeg slicing + compression, frame naming, weight budget, loading curtain | Change JS logic |
-| `cinematic-reviewer` | Fresh eyes. Compares live screenshot to the approved reference. Reports only concrete diffs with locations. Issues PASS/FAIL | Fix anything itself; pass anything it has not compared |
-| `perf-budget-auditor` | Measures frame weight, first paint, memory, rAF cost; fails the build over budget | Approve "close enough" |
+| `scrub-engineer` | the scrub engine, height math, damping, preload, rAF lifecycle | touch copy, or any non-hero section |
+| `frame-pipeline` | ffmpeg slicing, compression, frame naming, weight budget, loading curtain | change JS logic |
+| `cinematic-reviewer` | fresh-eyes comparison of the live page against the approved hero; concrete diffs with locations; PASS/FAIL | fix anything, or pass anything it has not compared |
+| `perf-budget-auditor` | frame weight, first paint, memory, rAF cost; fails the build over budget | approve "close enough" |
 
-**Reviewer gate — put this in the prompts, it is the important part:** the developer loops
-against the reviewer, and the loop stops at the **first PASS** or after **5 reviewer rounds**,
-whichever comes first. Without the gate a reviewer always finds something and the build never
-ends. 5 rounds is the ceiling; use 2 on a tight budget.
+**Reviewer gate:** the developer loops against the reviewer and stops at the **first PASS** or
+after **five rounds**, whichever comes first. Without the gate the reviewer always finds
+something and the loop never closes. Five is the ceiling; two is acceptable on a tight budget.
 
-**Prompt-polish rule:** before sending a rough instruction to a sub-agent, pass it through an
-AI once to rewrite it precisely, then send the polished version. Cheap, and it measurably
-improves agent accuracy.
+Before sending a rough instruction to a sub-agent, rewrite it once for precision, then send the
+polished version. It measurably improves their accuracy.
 
-## 9. COMPLETION GATE
+## 10. ASSUMPTIONS YOU ARE NOT ALLOWED TO MAKE
 
-All must be true with real output attached:
+Each of these is a real way this job gets faked. They are prohibited shortcuts.
 
-- [ ] Progress is hero-bound; page-level progress appears nowhere in the engine
-- [ ] Frame index changes at 3 sampled scroll positions and is monotonic forward / reversible backward
-- [ ] Film parks at progress 1 and restores to frame 0
-- [ ] No movement after the hero section (no runaway background layer)
-- [ ] Frame strip ≤ ~15MB/section, 1600px q88
-- [ ] Side-by-side screenshot vs approved reference attached
-- [ ] Reduced-motion and mobile behaviour demonstrated, not asserted
-- [ ] Reviewer agent issued PASS (or 5 rounds and the outstanding diffs are listed)
+1. That the strips are within budget. **Measure them.**
+2. That a headless screenshot proves the scrub works. Headless tooling blanks sticky canvases
+   when scrolled — verify by **sampling canvas pixels at scroll positions**, and confirm once in
+   a real browser.
+3. That "the animation plays" means the contract is met. It must be **hero-bound and finite**:
+   sample the progress values and show they come from the hero rect and park at 1.
+4. That more frames means smoother. Past ~180 frames it means slower.
+5. That `prefers-reduced-motion` on your own machine reflects the real audience. If your profile
+   reports `reduce`, override the media feature for verification (devtools / CDP) instead of
+   concluding the animation is broken — and still implement C12 properly.
+6. That installing a skill is the same as using it.
+7. That a passing build, an HTTP 200 or "no console errors" is evidence of anything.
+8. That a section can be clipped without any risk of falling back to page-level progress.
 
-Report failures as failures. An honest blocker beats a plausible claim.
+## 11. DEFINITION OF DONE
+
+Every line needs real output attached. Not a summary — the output.
+
+| # | Criterion | How it is measured |
+|---|---|---|
+| D1 | Progress is hero-bound | the code path shown, plus sampled `target` and `smooth` across a scroll jump |
+| D2 | Frame index changes across the scrub | canvas pixel samples at 3 progress points (start / middle / end), values differ |
+| D3 | Reversible | the same points sampled scrolling back; indices return toward frame 0 |
+| D4 | Parks at 1, no runaway | sampled values flat past the end of the hero; no movement after the section |
+| D5 | No page-level progress anywhere | grep of the engine for document-height-based progress: zero hits |
+| D6 | Weight | `du -sh` per strip, each ≤15 MB, with frame count and resolution reported |
+| D7 | First interactive paint | measured and reported |
+| D8 | Smoothing | `smooth` converges toward `target` over ~1s; frame counter steps 1–2 per sample, never 5+ |
+| D9 | Reduced motion | a static frame with the media feature forced on — screenshot |
+| D10 | Mobile | narrow-viewport screenshot, subject still framed |
+| D11 | Off-screen cost | no rAF work while the section is out of view |
+| D12 | Visual match | side-by-side screenshot of the live page against the approved hero, produced by you |
+| D13 | Reviewer verdict | PASS, or five rounds with the outstanding diffs listed |
+
+## 12. FINAL REPORT
+
+One message, at the end, in this shape:
+
+```
+WHAT CHANGED
+  <file>  <what changed>  <why>
+  (one line per file, no summaries)
+
+EVIDENCE
+  D1  <raw output>
+  D2  <raw output>
+  ... through D13
+
+ARTEFACTS
+  screenshots: <absolute paths>
+  strips: <path> <frames> <MB>
+
+DEVIATIONS FROM THE CONTRACT
+  <rule>  <what you did instead>  <why>          (or "none")
+
+NOT DONE / BROKEN
+  <item>  <state>  <next step>                    (or "none")
+
+SKILLS USED
+  <skill>  <what you took from it>
+```
+
+That report is the deliverable. Send it once, complete. The owner must not have to ask a
+follow-up question to learn whether any single criterion passed.

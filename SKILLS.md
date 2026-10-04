@@ -28,15 +28,27 @@ a high one as a good fit — use the tiers below, which are about fit for *this*
 
 ---
 
-## Already vendored — nothing to install
+## Vendored in this repo — no install needed
 
 | Skill | Stars | Where |
 |---|---|---|
 | `oso95/scroll-world` | 9,690 | `skills/scroll-world/` — MIT, licence included |
-| `zubair-trabzada/scroll-cinematic-claude` | 65 | `skills/scroll-cinematic/` — see `skills/NOTICE.md` |
 
 Start from `skills/scroll-world/references/scrub-engine.js`. It is the origin of most of this
 niche and the highest-rated thing in it.
+
+## Install from upstream — not vendored
+
+| Skill | Stars | Install |
+|---|---|---|
+| `zubair-trabzada/scroll-cinematic-claude` | 65 | `bash install-skills.sh` — or `git clone https://github.com/zubair-trabzada/scroll-cinematic-claude.git ~/.claude/skills/scroll-cinematic` |
+
+That repo publishes **no LICENSE file**, so it is not vendored here — pull it from upstream. Use
+only steps 0, 5, 6, 7 of its `SKILL.md`; steps 2–4 are image/video generation and are excluded
+by `DIRECTIVE.md` §2. What you want from it: `scripts/extract-frames.sh`,
+`scripts/compress-frames.sh`, `templates/scroll-cinematic.js` and `templates/index.html`.
+
+`install-skills.sh` installs both skills and skips anything already present.
 
 ---
 
