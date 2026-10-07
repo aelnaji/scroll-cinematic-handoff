@@ -236,14 +236,66 @@ Every line needs real output attached. Not a summary — the output.
 | D12 | Visual match | side-by-side screenshot of the live page against the approved hero, produced by you |
 | D13 | Reviewer verdict | PASS, or five rounds with the outstanding diffs listed |
 
-## 12. FINAL REPORT
+## 13. CHANGE DISCIPLINE — preserve what exists
+
+The site's content and design are **approved**. You are here for the scroll-driven 3D and
+nothing else. This section is binding.
+
+### You may change only these
+- `assets/al-ryum-scroll-3d.js` and `assets/al-ryum-scroll-3d.css` — the 3D chapters themselves.
+- Inside them: the scroll math, damping, rAF lifecycle, preload and loading gate, visibility
+  gating, quality degradation, reduced-motion behaviour and mobile stage sizing.
+- The pinned scene heights for the 3D chapters only.
+- The minimum wiring needed to load them (the tags in `index.html`).
+- A defect elsewhere in the page **only when it demonstrably stops the 3D from working**. State
+  which requirement it blocks.
+
+### You must not change
+- Copy, headings, body text, section order, navigation, footer, metadata.
+- Any image, video, frame strip or other media asset.
+- **Colours, palettes, gradients, fonts, spacing, radii, shadows or the design system.**
+- CSS custom properties / theme tokens.
+- The layout of any section that is not a 3D chapter.
+- Anything outside the target repository.
+
+### Rules
+1. **No new colours. No new theme. No re-skin. No "modernising".** The chapters must use the
+   site's existing colour values — read them out of the existing CSS (custom properties and
+   existing class values) and reuse them. If a value you want does not exist, take the nearest
+   existing one. Do not invent a colour, and do not add a token.
+2. **No rewrite for style.** If a sentence, section or layout "could be better", leave it alone
+   and list it as a proposal. Do not apply it.
+3. **Every changed file needs one line of justification** naming the specific defect or
+   requirement it serves. "Cleanup", "tidying", "consistency", "best practice" are not
+   justifications.
+4. **Smallest possible diff.** Where a fix forces a choice between changing content and changing
+   code, change the code.
+5. If a fix would require touching content or design, **do not apply it** — put it under
+   `PROPOSED, NOT APPLIED` with the reason.
+6. If you find an unrelated defect, **do not fix it silently**. Report it and leave the file
+   untouched.
+7. Extend the existing `assets/al-ryum-scroll-3d.js` module. Do not rewrite it from scratch and
+   do not introduce a second engine alongside it.
+
+### Proof you have to hand over
+Run a diff of the whole repository against the branch point you started from and show the raw
+diffstat. The only modified files must be the 3D chapter files plus the minimal wiring. **Any
+other modified file must be reverted before you report.** If the diffstat shows copy, styling or
+media changes, the job has failed regardless of how the 3D looks.
+
+## 14. FINAL REPORT
 
 One message, at the end, in this shape:
 
 ```
 WHAT CHANGED
-  <file>  <what changed>  <why>
+  <file>  <what changed>  <why — the specific defect or requirement>
   (one line per file, no summaries)
+
+CHANGE DISCIPLINE
+  diffstat vs the branch point: <raw output>
+  files changed outside the 3D chapters: <list, or "none">
+  PROPOSED, NOT APPLIED: <item>  <why applying it would touch content or design>
 
 EVIDENCE
   D1  <raw output>

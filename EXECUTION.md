@@ -1,7 +1,7 @@
 # EXECUTION — run these phases in order, without stopping
 
 This replaces a step-by-step prompt script. **Nobody is going to feed you these one at a time.**
-You run all of it, in order, and produce the report in `DIRECTIVE.md` §12 at the end.
+You run all of it, in order, and produce the report in `DIRECTIVE.md` §14 at the end.
 
 Rules for every phase:
 - Run the phase's **exit check** before moving to the next one. If the check fails, fix it or
@@ -105,7 +105,12 @@ for paint time and memory.
    declaring the visual match.
 3. Ask `perf-budget-auditor` to sign off. If it flags something, either fix it or list it as not
    done — do not bury it.
-4. Send the report in the `DIRECTIVE.md` §12 shape, once, complete.
+4. Send the report in the `DIRECTIVE.md` §14 shape, once, complete.
+
+**Before you report, run §13's proof:** `git diff --stat` against the branch point you started
+from. Only the 3D chapter files and the minimal wiring may appear. Revert anything else — no
+copy changes, no colour or theme changes, no media changes, no "improvements" — before you send
+the report.
 
 **Exit check** — every D-line has output, every deviation is named, and everything unfinished is
 listed with its next step.
